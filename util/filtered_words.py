@@ -1,8 +1,11 @@
 import nltk
 from nltk.corpus import stopwords, names
 from nltk import pos_tag, word_tokenize
+from better_profanity import profanity
+
 from wordfreq import top_n_list
 import random
+
 
 # Download NLTK resources
 nltk.download('names')
@@ -12,6 +15,7 @@ nltk.download('averaged_perceptron_tagger_eng')
 nltk.download('punkt')
 nltk.download('punkt_tab')
 
+profanity.load_censor_words()
 stop_words = set(stopwords.words('english'))
 word_list = top_n_list('en', 30000)
 
@@ -43,6 +47,9 @@ def process_words():
 
     # Remove stop words
     filtered_words = [word for word in filtered_words if word.lower() not in stop_words and word.isalpha()]
+
+    # Remove bad words
+    filtered_words = [word for word in filtered_words if not profanity.contains_profanity(word.lower())]
 
     filtered_words_list = filtered_words
 
