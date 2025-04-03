@@ -1,49 +1,6 @@
-import random
 import os
-from wordfreq import top_n_list
 from termcolor import colored
-
-import nltk
-from nltk.corpus import stopwords, names
-from nltk import pos_tag, word_tokenize
-
-# Download NLTK resources
-nltk.download('names')
-nltk.download('stopwords')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('averaged_perceptron_tagger_eng')
-nltk.download('punkt')
-nltk.download('punkt_tab')
-
-stop_words = set(stopwords.words('english'))  # Get the stop words
-word_list = top_n_list('en', 20000)  # Get top words
-
-proper_noun_set = set(name.lower() for name in names.words())
-
-def remove_proper_nouns(words):
-    filtered = []
-    for word in words:
-        # Check if the word is in the proper noun set (lowercase names)
-        if word.lower() in proper_noun_set:
-            continue  # Skip the word if it's a proper noun
-
-        # Tokenize and POS tag each word
-        tokens = word_tokenize(word)
-        tagged = pos_tag(tokens)
-        
-        # If no token is a proper noun (NNP or NNPS), keep the word
-        if not any(tag == 'NNP' or tag == 'NNPS' for _, tag in tagged):
-            filtered.append(word)
-    
-    return filtered
-
-
-# Remove proper nouns
-filtered_words = remove_proper_nouns(word_list)
-
-# Remove stop words
-filtered_words = [word for word in filtered_words if word.lower() not in stop_words and word.isalpha()]
-
+from util.filtered_words import chosen_word
 
 
 def configure_game():
@@ -66,24 +23,11 @@ def configure_game():
             print("Please enter a valid value.")
 
 
-def load_words(length, has_duplicates):
-    # Filter word list for words that match the configured length
-    filter = [word for word in filtered_words if len(word) == length and len(set(word)) == len(word)]
-
-    # Include duplicate letters
-    if has_duplicates:
-        filter = [word for word in filtered_words if len(word) == length]
-    
-    return filter
-
-
 if __name__ == '__main__':
     length, tries, has_duplicates = configure_game()
 
-    # Load words of the configured length
-    valid_words = load_words(length, has_duplicates)
-    chosen_word = random.choice(valid_words)
-    letter_list = list(chosen_word)  # Convert chosen word into a list of letters
+    word = chosen_word(length, has_duplicates)
+    letter_list = list(word)  # Convert chosen word into a list of letters
 
     tries_list = [['_' for _ in range(length)] for _ in range(tries)]
     try_counter = 0
@@ -116,7 +60,7 @@ if __name__ == '__main__':
                 tries_list[try_counter][g_letter] = colored(f'{guess_input[g_letter]}', 'grey')
 
         # Check for a win
-        if guess_input == chosen_word:
+        if guess_input == word:
             os.system('cls' if os.name == 'nt' else 'clear')
             print("Congratulations, you guessed the word!")
             break
@@ -124,4 +68,4 @@ if __name__ == '__main__':
         try_counter += 1
 
     if try_counter == tries:
-        print(f"Game over! The correct word was '{chosen_word}'.")
+        print(f"Game over! The correct word was '{word}'.")
