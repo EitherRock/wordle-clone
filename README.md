@@ -1,7 +1,6 @@
 ### A Wordle clone!
 
-
-utilizing wordfreq for the top common words and nltk for removing common proper nouns and stop words like 'and', 'that', 'for', 'is', etc 
+Using wordfreq to identify common words, nltk to filter out proper nouns and stop words (e.g., 'and', 'that', 'for', 'is'), and better_profanity to minimize swear words
 
 ## Terminal
 Termcolor
