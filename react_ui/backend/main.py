@@ -1,34 +1,43 @@
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from util.filtered_words import chosen_word 
+from util.filtered_words import chosen_word
+from .settings import GameSettings, default_settings
 
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
+current_settings = default_settings.model_copy()
+
+@app.get('/settings', response_model=GameSettings)
+def get_settings():
+    return current_settings
+
+@app.post('/settings', response_model=GameSettings)
+def update_settings(updated_settings: GameSettings):
+    global current_settings
+
+    # add validattion
+    current_settings = updated_settings
+    return current_settings
 
 @app.get('/')
 def read_root():
     return {'Hello': 'World'}
 
-@app.get('/items/{item_id}')
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {'item_id': item_id, 'q': q}
-
-@app.put('/items/{item_id}')
-def update_item(item_id: int, item: Item):
-    return {'item_name': item.name, 'item_id': item_id}
-
 @app.get('/word')
 def random_word():
 
-    word = chosen_word(5, False)
+    word = chosen_word(
+        current_settings.word_length, 
+        current_settings.has_recurring_letters, 
+        current_settings.allow_profanity
+    )
 
     return {'word': word}
+
 
 
 # create valid words list

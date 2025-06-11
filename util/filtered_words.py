@@ -48,20 +48,28 @@ def process_words():
     # Remove stop words
     filtered_words = [word for word in filtered_words if word.lower() not in stop_words and word.isalpha()]
 
-    # Remove bad words
-    filtered_words = [word for word in filtered_words if not profanity.contains_profanity(word.lower())]
-
     filtered_words_list = filtered_words
 
 process_words()
 
-def chosen_word(length: str, has_duplicates: bool):
+def chosen_word(length: int, has_duplicates: bool, allow_profanity: bool = False):
+    print(allow_profanity)
+    print(has_duplicates)
     
-    # Filter word list for words that match the configured length
-    filter = [word for word in filtered_words_list if len(word) == length and len(set(word)) == len(word)]
+    # Remove bad words
+    # filtered_words = [word for word in filtered_words if not profanity.contains_profanity(word.lower())]
 
-    # Include duplicate letters
-    if has_duplicates:
-        filter = [word for word in filtered_words_list if len(word) == length]
+    # Filter word list for words that match the configured length
+    filtered = [word for word in filtered_words_list if len(word) == length]
+    # filter = [word for word in filtered_words_list if len(word) == length and len(set(word)) == len(word) and not profanity.contains_profanity(word.lower())]
+
+    # Remove duplicate letters
+    if not has_duplicates:
+        filtered = [word for word in filtered if len(set(word)) == len(word)]
+
     
-    return random.choice(filter)
+    if not allow_profanity:
+        print('no profanity')
+        filtered = [word for word in filtered if not profanity.contains_profanity(word.lower())]
+    
+    return random.choice(filtered)
